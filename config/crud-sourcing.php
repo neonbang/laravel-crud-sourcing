@@ -1,6 +1,7 @@
 <?php
 
-// config for NeonBang/LaravelCrudSourcing
 return [
+
+    'model_metadata_map' => [],
 
 ];

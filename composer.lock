@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "40e53e470ed1e341d9fa9e54ac634197",
+    "content-hash": "9d157e9b4a8e3aeaacdde7cb293bac66",
     "packages": [
         {
             "name": "brick/math",
@@ -4877,6 +4877,67 @@
                 "source": "https://github.com/webmozarts/assert/tree/1.11.0"
             },
             "time": "2022-06-03T18:03:27+00:00"
+        },
+        {
+            "name": "zoha/laravel-meta",
+            "version": "v2.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ZohaBanam/laravel-meta.git",
+                "reference": "0ac3f7b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Zoha/laravel-meta/zipball/4d3d46d532ceb4c63cd119e9437464bd5e407385",
+                "reference": "4d3d46d532ceb4c63cd119e9437464bd5e407385",
+                "shasum": ""
+            },
+            "require": {
+                "laravel/framework": ">=8.0"
+            },
+            "require-dev": {
+                "orchestra/testbench": ">=6.0",
+                "php": ">=8",
+                "phpunit/phpunit": "^9"
+            },
+            "type": "package",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Zoha\\Meta\\MetaServiceProvider"
+                    ],
+                    "aliases": {
+                        "Meta": "Zoha\\Meta\\Facades\\MetaFacade"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Zoha\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Zoha Banam",
+                    "email": "zoha.banam@gmail.com"
+                }
+            ],
+            "description": "a package for working with models meta",
+            "keywords": [
+                "data",
+                "laravel",
+                "meta",
+                "package"
+            ],
+            "support": {
+                "issues": "https://github.com/Zoha/laravel-meta/issues",
+                "source": "https://github.com/Zoha/laravel-meta/tree/v2.0.2"
+            },
+            "time": "2024-03-31T14:12:50+00:00"
         }
     ],
     "packages-dev": [
