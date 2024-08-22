@@ -1,11 +1,13 @@
-# Watch and report on CRUD events within your Laravel application
-
 > Do NOT use this in production yet. We are still testing internally on some projects. We'll keep you posted.
 
+# Watch and report on your Laravel CRUD events
+
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/neonbang/laravel-crud-sourcing.svg?style=flat-square)](https://packagist.org/packages/neonbang/laravel-crud-sourcing)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/neonbang/laravel-crud-sourcing/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/neonbang/laravel-crud-sourcing/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/neonbang/laravel-crud-sourcing/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/neonbang/laravel-crud-sourcing/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/neonbang/laravel-crud-sourcing.svg?style=flat-square)](https://packagist.org/packages/neonbang/laravel-crud-sourcing)
+
+What problem are we solving here?
+
+> We were getting sick of adding columns to database tables that didn't really *fit* (something like `last_notification_sent_without_response`). We also were getting tired of creating report queries that were slow.
 
 ## Installation
 
