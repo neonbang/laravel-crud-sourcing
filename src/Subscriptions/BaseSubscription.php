@@ -3,6 +3,7 @@
 namespace NeonBang\LaravelCrudSourcing\Subscriptions;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use NeonBang\LaravelCrudSourcing\Jobs\QueueSubscriber;
 
 abstract class BaseSubscription
@@ -21,6 +22,8 @@ abstract class BaseSubscription
 
     abstract public function getModelClass(): string;
 
+    abstract public function getOwner(): Model;
+
     abstract public function validate(): bool;
 
     abstract public function value(): mixed;
@@ -32,15 +35,15 @@ abstract class BaseSubscription
             return;
         }
 
-        $currentMetadataValue = $this->record->getMeta($this->key());
+        $currentMetadataValue = $this->getOwner()->getMeta($this->key());
 
-        if ($currentMetadataValue && $this->conditions($currentMetadataValue)) {
+        if ($currentMetadataValue && ! $this->conditions($currentMetadataValue)) {
             $this->metadata = $currentMetadataValue;
         } else {
             if ($currentMetadataValue) {
-                $this->record->updateMeta($this->key(), $this->metadata = $this->value());
+                $this->getOwner()->updateMeta($this->key(), $this->metadata = $this->value());
             } else {
-                $this->record->setMeta($this->key(), $this->metadata = $this->value());
+                $this->getOwner()->setMeta($this->key(), $this->metadata = $this->value());
             }
         }
     }

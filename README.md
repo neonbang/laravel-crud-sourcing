@@ -9,6 +9,13 @@ What problem are we solving here?
 
 > We were getting sick of adding columns to database tables that didn't really *fit* (something like `last_notification_sent_without_response`). We also were getting tired of creating report queries that were slow.
 
+## Pre-Production Notes
+
+- This currently relies heavily on the `zoha/laravel-meta` package.
+  - We are finding a few bugs (and submitting PR's like this one: https://github.com/Zoha/laravel-meta/pull/36)
+  - Some functionality *doesn't quite fit* what we need so we may "decorate" it in the future or build out our own implementation of a "meta-able" flow
+  - By having this we do have an additional `meta.php` configuration file in `config/`
+- **There are not tests yet!** Don't worry. We'll add them soon. We currently test it within our private repo applications so it's currently being tested via higher level feature tests using relevant business domain problems.
 ## Installation
 
 You can install the package via composer:
