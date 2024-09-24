@@ -4,7 +4,9 @@
     "keywords": [
         "Neon Bang",
         "laravel",
-        "laravel-crud-sourcing"
+        "laravel-crud-sourcing",
+        "crud",
+        "events"
     ],
     "homepage": "https://github.com/neonbang/laravel-crud-sourcing",
     "license": "MIT",
@@ -17,7 +19,7 @@
     ],
     "require": {
         "php": "^8.1",
-        "illuminate/contracts": "^9.0||^10.0||^11.0",
+        "illuminate/contracts": "^9.0||^10.0",
         "zoha/laravel-meta": "^2.0"
     },
     "require-dev": {
