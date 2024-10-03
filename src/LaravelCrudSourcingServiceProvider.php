@@ -16,7 +16,7 @@ class LaravelCrudSourcingServiceProvider extends ServiceProvider
             __DIR__.'/../config/crud-sourcing.php' => config_path('crud-sourcing.php'),
         ], 'laravel-crud-sourcing-config');
 
-        foreach (config('crud-sourcing.model_metadata_map', []) as $model => $subscriptions) {
+        foreach (config('crud-sourcing.models', []) as $model => $subscriptions) {
             foreach ($subscriptions as $attribute => $subscription) {
                 $subscriber = new $subscription($attribute);
                 foreach (Arr::wrap($subscriber->getEloquentEvents()) as $event) {
@@ -27,13 +27,15 @@ class LaravelCrudSourcingServiceProvider extends ServiceProvider
             }
         }
 
-        foreach (config('crud-sourcing.report_map', []) as $subscription) {
+        foreach (config('crud-sourcing.reports', []) as $subscription) {
             foreach ($subscription::columns() as $column) {
                 if ($column instanceof ReportGroup) {
                     $reportGroup = $column;
                     foreach ($reportGroup->getColumns() as $reportColumn) {
                         Event::listen('eloquent.'.$reportGroup->getEloquentEvent().': '.$reportGroup->getEloquentClass(), function ($model) use ($reportColumn, $subscription) {
-                            $reportColumn->run($model, $subscription);
+                            if (! config('crud-sourcing.bypass', false)) {
+                                $reportColumn->run($model, $subscription);
+                            }
                         });
                     }
                 }

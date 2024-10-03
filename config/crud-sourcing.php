@@ -2,6 +2,8 @@
 
 return [
 
-    'model_metadata_map' => [],
+    'reports' => [],
+
+    'models' => [],
 
 ];
