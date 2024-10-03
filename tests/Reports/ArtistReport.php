@@ -4,16 +4,19 @@ namespace NeonBang\LaravelCrudSourcing\Tests\Reports;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use NeonBang\LaravelCrudSourcing\Models\Aggregate;
 use NeonBang\LaravelCrudSourcing\Models\Columns\ReportData;
 use NeonBang\LaravelCrudSourcing\Models\Columns\ReportGroup;
 use NeonBang\LaravelCrudSourcing\Tests\Models\Album;
 use NeonBang\LaravelCrudSourcing\Tests\Subscribers\NextAlbum;
 
-class ArtistReport extends Model
+class ArtistReport extends Aggregate
 {
     protected $guarded = [];
 
-    public static function columns()
+    protected $table = 'report_artist_aggregate_data';
+
+    public static function columns(): array
     {
         return [
             ReportGroup::make([
@@ -24,17 +27,27 @@ class ArtistReport extends Model
         ];
     }
 
-    public static function defaultData($model): array
+    public static function getOwner(): string
     {
-        return [
-            'artist_id' => $model->artist_id,
-        ];
+        return 'artist_id';
     }
 
-    public static function for(Model $model): self
+    public static function getOwnerValue(Model $model): mixed
     {
-        return self::query()->where('artist_id', $model->id)->first();
+        return $model->id;
     }
+
+    // public static function defaultData($model): array
+    // {
+    //     return [
+    //         'artist_id' => $model->artist_id,
+    //     ];
+    // }
+    //
+    // public static function for(Model $model): self
+    // {
+    //     return self::query()->where('artist_id', $model->id)->first();
+    // }
 
     // public static function getNextAlbumReleaseDateData($value)
     // {
@@ -44,8 +57,8 @@ class ArtistReport extends Model
     //     ];
     // }
 
-    public function getTable()
-    {
-        return 'report_artist_aggregate_data';
-    }
+    // public function getTable()
+    // {
+    //     return 'report_artist_aggregate_data';
+    // }
 }

@@ -36,4 +36,5 @@ it('can create the artist report', function () {
     $report = \NeonBang\LaravelCrudSourcing\Tests\Reports\ArtistReport::for($artist);
 
     expect($report)->not()->toBeNull();
+    expect($report->next_album_release_date)->toBe('2024-08-01 00:00:00');
 });

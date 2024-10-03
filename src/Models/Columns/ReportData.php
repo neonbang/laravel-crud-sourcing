@@ -44,7 +44,7 @@ class ReportData
         $data = method_exists($report, $insertMethod = 'get'.Str::of($column->getColumnName())->studly()->toString().'Data')
             ? $report::$insertMethod($value)
             : [$column->getColumnName() => $value];
-
+        
         $report::query()
             ->create(array_merge($report::defaultData($this->record), $data));
     }
