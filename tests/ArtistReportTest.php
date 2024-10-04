@@ -54,10 +54,10 @@ it('can create the artist report', function () {
 
     expect($report)->not()->toBeNull();
     expect($report->record_label)->toBe('Underscore Rawhide Records');
-    // expect($report->next_album_release_date)->toBe('2024-08-01 00:00:00');
-    // expect($report->next_album_title)->toBe('Introducting The Bashdogs');
+    expect($report->next_album_release_date)->toBe('2024-08-01 00:00:00');
+    expect($report->next_album_title)->toBe('Introducting The Bashdogs');
     expect($report->total_tickets_revenue)->toBe(375.00);
-    // expect($report->total_tickets_sold_count)->toBe(15);
+    expect($report->total_tickets_sold_count)->toBe(15);
 });
 
 it('can rebuild the artist ', function () {
@@ -69,8 +69,8 @@ it('can rebuild the artist ', function () {
 
     expect($report)->not()->toBeNull();
     expect($report->record_label)->toBe('Underscore Rawhide Records');
-    // expect($report->next_album_release_date)->toBe('2024-08-01 00:00:00');
-    // expect($report->next_album_title)->toBe('Introducting The Bashdogs');
+    expect($report->next_album_release_date)->toBe('2024-08-01 00:00:00');
+    expect($report->next_album_title)->toBe('Introducting The Bashdogs');
     expect($report->total_tickets_revenue)->toBe(375.00);
-    // expect($report->total_tickets_sold_count)->toBe(15);
+    expect($report->total_tickets_sold_count)->toBe(15);
 });

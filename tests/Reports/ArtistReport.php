@@ -31,13 +31,13 @@ class ArtistReport extends Aggregate
                 ->onEloquentEvent(Artist::class)
                 ->onEloquentEvent(\NeonBang\LaravelCrudSourcing\Tests\Models\RecordLabel::class, 'updated', 'record.label'),
 
-            // ReportGroup::make([
-            //     ReportData::make('next_album')
-            //         ->subjectPath('artist')
-            //         ->action(NextAlbum::class)
-            //         ->transform(NextAlbumTransformer::class),
-            // ])
-            //     ->onEloquentEvent(Album::class),
+            ReportGroup::make([
+                ReportData::make('next_album')
+                    ->subjectPath('artist')
+                    ->action(NextAlbum::class)
+                    ->transform(NextAlbumTransformer::class),
+            ])
+                ->onEloquentEvent(Album::class),
 
             ReportGroup::make([
                 ReportData::make('ticket_sales')
