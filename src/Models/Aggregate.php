@@ -3,6 +3,7 @@
 namespace NeonBang\LaravelCrudSourcing\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use NeonBang\LaravelCrudSourcing\Models\Columns\ReportGroup;
 
 abstract class Aggregate extends Model
 {
@@ -30,5 +31,24 @@ abstract class Aggregate extends Model
     public static function getOwnerValue(Model $model): mixed
     {
         return $model->id;
+    }
+
+    public static function rebuildFor(Model $model)
+    {
+        // Remove the entry to rebuild it
+        static::query()->where(static::getOwner(), static::getOwnerValue($model))->delete();
+
+        foreach (static::columns() as $column) {
+            if ($column instanceof ReportGroup) {
+                $reportGroup = $column;
+                foreach ($reportGroup->getColumns() as $reportColumn) {
+                    $reportColumn->rebuild($model, static::class);
+                }
+            } else {
+                $column->run($model, static::class);
+            }
+        }
+
+        return self::query()->where(static::getOwner(), static::getOwnerValue($model))->first();
     }
 }

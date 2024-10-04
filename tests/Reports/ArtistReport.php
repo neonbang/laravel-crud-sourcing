@@ -44,29 +44,4 @@ class ArtistReport extends Aggregate
     {
         return $model->id;
     }
-
-    // public static function defaultData($model): array
-    // {
-    //     return [
-    //         'artist_id' => $model->artist_id,
-    //     ];
-    // }
-    //
-    // public static function for(Model $model): self
-    // {
-    //     return self::query()->where('artist_id', $model->id)->first();
-    // }
-
-    // public static function getNextAlbumReleaseDateData($value)
-    // {
-    //     return [
-    //         'next_album_release_date' => $value,
-    //         'next_album_release_date_formatted' => Carbon::parse($value)->format('Y-m-d'),
-    //     ];
-    // }
-
-    // public function getTable()
-    // {
-    //     return 'report_artist_aggregate_data';
-    // }
 }
