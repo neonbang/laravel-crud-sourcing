@@ -18,6 +18,8 @@ class ReportData
 
     protected bool $rebuilding = false;
 
+    protected ?string $subjectPath = null;
+
     protected ?Model $record = null;
 
     protected mixed $transformer = null;
@@ -67,7 +69,6 @@ class ReportData
         $record = ! $this->rebuilding ? $this->record : $this->listenerCallback::subjectModelNormalizer($this->record);
 
         if ($this->transformer) {
-
             $transformer = new $this->transformer;
             $data = $transformer($record);
         } else {
@@ -77,7 +78,13 @@ class ReportData
         }
 
         $report::query()
-            ->updateOrCreate($report::defaultData($this->record), $data);
+            ->updateOrCreate($report::defaultData($this->record, $this->subjectPath), $data);
+    }
+
+    public function subjectPath(string $subjectPath): ReportData
+    {
+        $this->subjectPath = $subjectPath;
+        return $this;
     }
 
     public function transform($transformCallback): ReportData

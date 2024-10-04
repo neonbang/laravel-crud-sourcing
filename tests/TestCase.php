@@ -53,6 +53,7 @@ abstract class TestCase extends OrchestraTestCase
         Schema::create('concerts', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedBigInteger('artist_id')->index();
+            $table->float('base_ticket_price')->default(0.00);
             $table->dateTime('doors_at')->nullable();
             $table->dateTime('starts_at')->nullable();
             $table->timestamps();
@@ -61,6 +62,7 @@ abstract class TestCase extends OrchestraTestCase
         Schema::create('ticket_sales', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedBigInteger('concert_id')->index();
+            $table->float('ticket_price')->default(0.00);
             $table->timestamps();
         });
 
@@ -99,6 +101,8 @@ abstract class TestCase extends OrchestraTestCase
             $table->string('record_label')->nullable();
             $table->date('next_album_release_date')->nullable();
             $table->string('next_album_title')->nullable();
+            $table->float('total_tickets_revenue')->default(0.00);
+            $table->integer('total_tickets_sold_count')->default(0);
             $table->timestamps();
         });
     }

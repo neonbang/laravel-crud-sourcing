@@ -28,12 +28,21 @@ beforeEach(function () {
         'name' => 'The Bashdogs',
         'record_label_id' => $recordLabel->id,
     ]);
-
-    // Our base data
     $this->artist->albums()->create([
         'title' => 'Introducting The Bashdogs',
         'release_date' => '2024-08-01',
     ]);
+    // Tickets and Sales
+    for($i = 1; $i <= 5; $i++) {
+        $concert = $this->artist->concerts()->create([
+            'base_ticket_price' => 25.00,
+        ]);
+        for($j = 1; $j <= $i; $j++) {
+            $concert->sales()->create([
+                'ticket_price' => 25.00,
+            ]);
+        }
+    }
 });
 
 it('can create the artist report', function () {
@@ -45,6 +54,8 @@ it('can create the artist report', function () {
     expect($report->record_label)->toBe('Underscore Rawhide Records');
     expect($report->next_album_release_date)->toBe('2024-08-01 00:00:00');
     expect($report->next_album_title)->toBe('Introducting The Bashdogs');
+    expect($report->total_tickets_revenue)->toBe(375.00);
+    expect($report->total_tickets_sold_count)->toBe(15);
 });
 
 it('can rebuild the artist ', function () {
@@ -58,4 +69,6 @@ it('can rebuild the artist ', function () {
     expect($report->record_label)->toBe('Underscore Rawhide Records');
     expect($report->next_album_release_date)->toBe('2024-08-01 00:00:00');
     expect($report->next_album_title)->toBe('Introducting The Bashdogs');
+    expect($report->total_tickets_revenue)->toBe(100.00);
+    expect($report->total_tickets_sold_count)->toBe(4);
 });

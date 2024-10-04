@@ -11,8 +11,17 @@ abstract class Aggregate extends Model
 
     abstract public static function columns(): array;
 
-    public static function defaultData($model): array
+    public static function defaultData($model, $path = null): array
     {
+        if ($path) {
+            $pieces = explode('.', $path);
+            $base = $model;
+            foreach ($pieces as $piece) {
+                $base = $base->$piece;
+            }
+            $model = $base;
+        }
+
         return [
             static::getOwner() => static::getOwnerValue($model),
         ];
