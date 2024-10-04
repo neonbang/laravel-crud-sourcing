@@ -2,16 +2,22 @@
 
 namespace NeonBang\LaravelCrudSourcing\Models\Columns;
 
+use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use NeonBang\LaravelCrudSourcing\Jobs\QueueColumn;
+use NeonBang\LaravelCrudSourcing\Traits\EloquentEvents;
 
 class ReportData
 {
+    use EloquentEvents;
+
     protected ?string $listenerCallback = null;
 
     protected ?Model $record = null;
+
+    protected mixed $transformer = null;
 
     public function __construct(protected string $columnName)
     {
@@ -41,12 +47,23 @@ class ReportData
 
     public function insert($report, $column, $value = null)
     {
-        $data = method_exists($report, $insertMethod = 'get'.Str::of($column->getColumnName())->studly()->toString().'Data')
-            ? $report::$insertMethod($value)
-            : [$column->getColumnName() => $value];
-        
+        if ($this->transformer) {
+            $transromer = new $this->transformer;
+            $data = $transromer($this->record);
+        } else {
+            $data = method_exists($report, $insertMethod = 'get'.Str::of($column->getColumnName())->studly()->toString().'Data')
+                ? $report::$insertMethod($value)
+                : [$column->getColumnName() => $value];
+        }
+
         $report::query()
-            ->create(array_merge($report::defaultData($this->record), $data));
+            ->updateOrCreate($report::defaultData($this->record), $data);
+    }
+
+    public function transform($transformCallback): ReportData
+    {
+        $this->transformer = $transformCallback;
+        return $this;
     }
 
     public function run(mixed $model, mixed $report): void

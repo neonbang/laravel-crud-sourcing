@@ -2,11 +2,11 @@
 
 namespace NeonBang\LaravelCrudSourcing\Models\Columns;
 
+use NeonBang\LaravelCrudSourcing\Traits\EloquentEvents;
+
 class ReportGroup
 {
-    protected ?string $eloquentClass = null;
-
-    protected ?string $eloquentEvent = null;
+    use EloquentEvents;
 
     public function __construct(protected array $columns)
     {
@@ -20,23 +20,5 @@ class ReportGroup
     public function getColumns(): array
     {
         return $this->columns;
-    }
-
-    public function getEloquentClass(): ?string
-    {
-        return $this->eloquentClass;
-    }
-
-    public function getEloquentEvent(): ?string
-    {
-        return $this->eloquentEvent;
-    }
-
-    public function onEloquentEvent(string $className, string $event = 'saved'): ReportGroup
-    {
-        $this->eloquentClass = $className;
-        $this->eloquentEvent = $event;
-
-        return $this;
     }
 }

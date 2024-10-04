@@ -4,6 +4,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Schema;
 use NeonBang\LaravelCrudSourcing\Tests\Models\Artist;
+use NeonBang\LaravelCrudSourcing\Tests\Models\RecordLabel;
 
 beforeAll(function () {
 
@@ -11,7 +12,8 @@ beforeAll(function () {
 
 it('can create the artist report', function () {
     // The Report we want to generate:
-    // [ ] next_album_release_date
+    // [ ] current_record_label - This is primarily to have a related model's SINGLE value
+    // [x] next_album_release_date
     // [ ] next_album_title
     // [ ] total_tickets_revenue
     // [ ] total_tickets_sold_count
@@ -23,7 +25,12 @@ it('can create the artist report', function () {
 
     Carbon::setTestNow('2024-07-01');
 
-    $artist = Artist::create(['name' => 'The Bashdogs']);
+    $recordLabel = RecordLabel::create(['name' => 'Underscore Rawhide Records']);
+
+    $artist = Artist::create([
+        'name' => 'The Bashdogs',
+        'record_label_id' => $recordLabel->id,
+    ]);
 
     // Our base data
     $artist->albums()->create([
@@ -36,5 +43,7 @@ it('can create the artist report', function () {
     $report = \NeonBang\LaravelCrudSourcing\Tests\Reports\ArtistReport::for($artist);
 
     expect($report)->not()->toBeNull();
+    expect($report->record_label)->toBe('Underscore Rawhide Records');
     expect($report->next_album_release_date)->toBe('2024-08-01 00:00:00');
+    expect($report->next_album_title)->toBe('Introducting The Bashdogs');
 });

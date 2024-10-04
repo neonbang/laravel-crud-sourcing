@@ -38,6 +38,12 @@ class LaravelCrudSourcingServiceProvider extends ServiceProvider
                             }
                         });
                     }
+                } else {
+                    Event::listen('eloquent.'.$column->getEloquentEvent().': '.$column->getEloquentClass(), function ($model) use ($column, $subscription) {
+                        if (! config('crud-sourcing.bypass', false)) {
+                            $column->run($model, $subscription);
+                        }
+                    });
                 }
                 // Event::listen('eloquent.'.$event.': '.$subscriber->getModelClass(), function ($model) use ($subscriber) {
                 //     $subscriber->run($model);

@@ -19,6 +19,6 @@ class NextAlbum
             return;
         }
 
-        $column->insert($report, $column, $model->release_date);
+        $column->insert($report, $column, $model);
     }
 }

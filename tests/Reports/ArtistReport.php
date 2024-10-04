@@ -8,7 +8,10 @@ use NeonBang\LaravelCrudSourcing\Models\Aggregate;
 use NeonBang\LaravelCrudSourcing\Models\Columns\ReportData;
 use NeonBang\LaravelCrudSourcing\Models\Columns\ReportGroup;
 use NeonBang\LaravelCrudSourcing\Tests\Models\Album;
+use NeonBang\LaravelCrudSourcing\Tests\Models\Artist;
 use NeonBang\LaravelCrudSourcing\Tests\Subscribers\NextAlbum;
+use NeonBang\LaravelCrudSourcing\Tests\Subscribers\RecordLabel;
+use NeonBang\LaravelCrudSourcing\Tests\Transformers\NextAlbumTransformer;
 
 class ArtistReport extends Aggregate
 {
@@ -19,9 +22,14 @@ class ArtistReport extends Aggregate
     public static function columns(): array
     {
         return [
+            ReportData::make('record_label')
+                ->action(RecordLabel::class)
+                ->onEloquentEvent(Artist::class),
+
             ReportGroup::make([
-                ReportData::make('next_album_release_date')
-                    ->action(NextAlbum::class),
+                ReportData::make('next_album')
+                    ->action(NextAlbum::class)
+                    ->transform(NextAlbumTransformer::class),
             ])
                 ->onEloquentEvent(Album::class),
         ];

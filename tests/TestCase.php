@@ -37,8 +37,15 @@ abstract class TestCase extends OrchestraTestCase
 
     private function setUpDatabase()
     {
+        Schema::create('record_labels', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name')->nullable();
+            $table->timestamps();
+        });
+
         Schema::create('artists', function (Blueprint $table) {
             $table->increments('id');
+            $table->unsignedBigInteger('record_label_id')->index();
             $table->string('name')->nullable();
             $table->timestamps();
         });
@@ -89,7 +96,9 @@ abstract class TestCase extends OrchestraTestCase
         Schema::create('report_artist_aggregate_data', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedBigInteger('artist_id')->index();
+            $table->string('record_label')->nullable();
             $table->date('next_album_release_date')->nullable();
+            $table->string('next_album_title')->nullable();
             $table->timestamps();
         });
     }
