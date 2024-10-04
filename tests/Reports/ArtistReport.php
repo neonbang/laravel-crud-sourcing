@@ -45,7 +45,7 @@ class ArtistReport extends Aggregate
                     ->action(TicketSales::class)
                     ->transform(TicketSalesTransformer::class),
             ])
-                ->onEloquentEvent(TicketSale::class, 'created', 'concert.artist'),
+                ->onEloquentEvent(TicketSale::class, 'created'),
         ];
     }
 

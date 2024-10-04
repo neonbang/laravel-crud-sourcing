@@ -9,10 +9,12 @@ use Illuminate\Support\Str;
 use NeonBang\LaravelCrudSourcing\Jobs\QueueColumn;
 use NeonBang\LaravelCrudSourcing\Tests\Reports\ArtistReport;
 use NeonBang\LaravelCrudSourcing\Traits\EloquentEvents;
+use NeonBang\LaravelCrudSourcing\Traits\GroupableEvents;
 
 class ReportData
 {
     use EloquentEvents;
+    use GroupableEvents;
 
     protected ?string $attribute = null;
 
@@ -20,7 +22,7 @@ class ReportData
 
     protected bool $rebuilding = false;
 
-    public ?string $subjectPath = null;
+    protected ?string $subjectPath = null;
 
     protected ?Model $record = null;
 
@@ -48,9 +50,14 @@ class ReportData
         return $this->listenerCallback;
     }
 
-    public function getRelatedModel($subjectModel)
+    // public function getRelatedModel($subjectModel)
+    // {
+    //     return $this->listenerCallback::getSubjectModel($subjectModel);
+    // }
+
+    public function getSubjectPath(): ?string
     {
-        return $this->listenerCallback::getSubjectModel($subjectModel);
+        return $this->subjectPath;
     }
 
     public function calculate(mixed $report): void
@@ -58,7 +65,12 @@ class ReportData
         $listener = new $this->listenerCallback;
 
         if ($this->rebuilding || $listener->include($this->record)) {
-            $data = $listener->scope($this->record, $this->subject);
+            if ($this->isGrouped()) {
+                $data = $listener->group($this->record);
+            } else {
+                $data = $listener->scope($this->record, $this->subject);
+            }
+
             $this->insert($report, $this, $data);
         }
     }
@@ -104,10 +116,10 @@ class ReportData
                 : [$column->getColumnName() => $value];
         }
 
-        // dump(['DATA', $report::defaultData($record), $data]);
+        dump(['DATA', $report::defaultData($record, $this->groupBy), $data]);
 
         $report::query()
-            ->updateOrCreate($report::defaultData($this->subject), $data);
+            ->updateOrCreate($report::defaultData($this->subject, $this->groupBy), $data);
     }
 
     public function subjectPath(string $subjectPath): ReportData

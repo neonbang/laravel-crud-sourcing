@@ -12,8 +12,8 @@ beforeEach(function () {
     // [x] current_record_label - This is primarily to have a related model's SINGLE value
     // [x] next_album_release_date
     // [x] next_album_title
-    // [ ] total_tickets_revenue
-    // [ ] total_tickets_sold_count
+    // [x] total_tickets_revenue
+    // [x] total_tickets_sold_count
     // [ ] last_concert_date - Will do last as most likely ran/checked via cron
     // [ ] last_concert_venue - Will do last as most likely ran/checked via cron
     // [ ] last_concert_venue_city - Will do last as most likely ran/checked via cron

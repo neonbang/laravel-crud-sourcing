@@ -2,6 +2,7 @@
 
 namespace NeonBang\LaravelCrudSourcing\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use NeonBang\LaravelCrudSourcing\Models\Columns\ReportGroup;
 
@@ -11,7 +12,7 @@ abstract class Aggregate extends Model
 
     abstract public static function columns(): array;
 
-    public static function defaultData($model, $path = null): array
+    public static function defaultData($model, $group = null): array
     {
         // if ($path) {
         //     dump([get_class($model),$path]);
@@ -24,6 +25,13 @@ abstract class Aggregate extends Model
         //     dump(['model', $model->toArray()]);
         // }
 
+        if ($group) {
+            return [
+                'group_type' => static::class,
+                'group_by' => $model->created_at->format('Y_m_d'),
+            ];
+        }
+
         return [
             static::getOwner() => static::getOwnerValue($model),
         ];
@@ -32,6 +40,11 @@ abstract class Aggregate extends Model
     public static function for(Model $model): static|Model
     {
         return self::query()->where(static::getOwner(), static::getOwnerValue($model))->first();
+    }
+
+    public static function run(): Builder
+    {
+        return self::query();
     }
 
     public static function getOwner(): string
@@ -53,10 +66,6 @@ abstract class Aggregate extends Model
             if ($column instanceof ReportGroup) {
                 $reportGroup = $column;
                 foreach ($reportGroup->getColumns() as $reportColumn) {
-                    // foreach ($reportGroup->getEloquentEvents() as $event) {
-                    //     $reportColumn->rebuild($model, static::class);
-                    // }
-                    dump(['REBUILD STACK', get_class($model), $reportColumn->getAction(), $reportColumn->subjectPath]);
                     $reportColumn->rebuildFrom($model, static::class);
                 }
             } else {

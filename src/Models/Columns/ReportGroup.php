@@ -3,10 +3,12 @@
 namespace NeonBang\LaravelCrudSourcing\Models\Columns;
 
 use NeonBang\LaravelCrudSourcing\Traits\EloquentEvents;
+use NeonBang\LaravelCrudSourcing\Traits\GroupableEvents;
 
 class ReportGroup
 {
     use EloquentEvents;
+    use GroupableEvents;
 
     public function __construct(protected array $columns)
     {

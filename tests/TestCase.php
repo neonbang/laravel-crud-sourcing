@@ -6,6 +6,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use NeonBang\LaravelCrudSourcing\LaravelCrudSourcingServiceProvider;
 use NeonBang\LaravelCrudSourcing\Tests\Reports\ArtistReport;
+use NeonBang\LaravelCrudSourcing\Tests\Reports\DailyReport;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 
 abstract class TestCase extends OrchestraTestCase
@@ -19,7 +20,10 @@ abstract class TestCase extends OrchestraTestCase
 
     public function getEnvironmentSetUp($app)
     {
-        config()->set('crud-sourcing.reports', [ArtistReport::class]);
+        config()->set('crud-sourcing.reports', [
+            // ArtistReport::class,
+            DailyReport::class,
+        ]);
 
         config()->set('database.default', 'sqlite');
         config()->set('database.connections.sqlite', [
@@ -101,6 +105,16 @@ abstract class TestCase extends OrchestraTestCase
             $table->string('record_label')->nullable();
             $table->date('next_album_release_date')->nullable();
             $table->string('next_album_title')->nullable();
+            $table->float('total_tickets_revenue')->default(0.00);
+            $table->integer('total_tickets_sold_count')->default(0);
+            $table->timestamps();
+        });
+
+        // Creates the report table: report_daily_data
+        Schema::create('report_daily_data', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('group_type')->index();
+            $table->string('group_by')->index();
             $table->float('total_tickets_revenue')->default(0.00);
             $table->integer('total_tickets_sold_count')->default(0);
             $table->timestamps();
