@@ -8,6 +8,8 @@ trait EloquentEvents
 
     protected ?string $eloquentEvent = null;
 
+    protected array $eloquentEvents = [];
+
     public function getEloquentClass(): ?string
     {
         return $this->eloquentClass;
@@ -18,10 +20,21 @@ trait EloquentEvents
         return $this->eloquentEvent;
     }
 
-    public function onEloquentEvent(string $className, string $event = 'saved'): self
+    public function getEloquentEvents(): array
+    {
+        return $this->eloquentEvents;
+    }
+
+    public function onEloquentEvent(string $className, string $event = 'saved', string $relationalPathToSubject = null): self
     {
         $this->eloquentClass = $className;
         $this->eloquentEvent = $event;
+
+        $this->eloquentEvents[] = [
+            'model' => $className,
+            'event' => $event,
+            'trace' => $relationalPathToSubject,
+        ];
 
         return $this;
     }

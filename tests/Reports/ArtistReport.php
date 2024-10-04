@@ -27,15 +27,17 @@ class ArtistReport extends Aggregate
         return [
             ReportData::make('record_label')
                 ->action(RecordLabel::class)
-                ->onEloquentEvent(Artist::class),
+                ->withValue('name')
+                ->onEloquentEvent(Artist::class)
+                ->onEloquentEvent(\NeonBang\LaravelCrudSourcing\Tests\Models\RecordLabel::class, 'updated', 'record.label'),
 
-            ReportGroup::make([
-                ReportData::make('next_album')
-                    ->subjectPath('artist')
-                    ->action(NextAlbum::class)
-                    ->transform(NextAlbumTransformer::class),
-            ])
-                ->onEloquentEvent(Album::class),
+            // ReportGroup::make([
+            //     ReportData::make('next_album')
+            //         ->subjectPath('artist')
+            //         ->action(NextAlbum::class)
+            //         ->transform(NextAlbumTransformer::class),
+            // ])
+            //     ->onEloquentEvent(Album::class),
 
             ReportGroup::make([
                 ReportData::make('ticket_sales')
@@ -43,7 +45,7 @@ class ArtistReport extends Aggregate
                     ->action(TicketSales::class)
                     ->transform(TicketSalesTransformer::class),
             ])
-                ->onEloquentEvent(TicketSale::class),
+                ->onEloquentEvent(TicketSale::class, 'created', 'concert.artist'),
         ];
     }
 

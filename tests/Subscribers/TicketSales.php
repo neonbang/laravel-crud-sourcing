@@ -9,24 +9,9 @@ use NeonBang\LaravelCrudSourcing\Tests\Models\TicketSale;
 
 class TicketSales
 {
-    public static function subjectModelNormalizer(Model $model)
+    public function scope(TicketSale|Model $model, ?Model $subject = null): mixed
     {
-        return match (get_class($model)) {
-            Artist::class => self::scoped($model),
-            default => $model,
-        };
-    }
-
-    public static function scoped(TicketSale|Model $model): mixed
-    {
-        $base = $model instanceof Artist ? $model : $model->concert->artist;
-        return $base->ticketSales;
-    }
-
-    public function scope(TicketSale|Model $model): mixed
-    {
-        $base = $model instanceof Artist ? $model : $model->concert->artist;
-        return $base->ticketSales;
+        return $subject->ticketSales;
     }
 
     public function include(TicketSale|Model $model): bool
