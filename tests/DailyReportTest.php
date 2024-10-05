@@ -4,7 +4,6 @@ use Illuminate\Support\Carbon;
 use NeonBang\LaravelCrudSourcing\Enums\Group;
 use NeonBang\LaravelCrudSourcing\Tests\Models\Artist;
 use NeonBang\LaravelCrudSourcing\Tests\Models\RecordLabel;
-use NeonBang\LaravelCrudSourcing\Tests\Models\TicketSale;
 use NeonBang\LaravelCrudSourcing\Tests\Reports\DailyReport;
 
 beforeEach(function () {
@@ -19,10 +18,10 @@ beforeEach(function () {
         'record_label_id' => $recordLabel->id,
     ]);
 
-    $concertA = $this->artist->concerts()->create([
+    $this->concertA = $this->artist->concerts()->create([
         'base_ticket_price' => 25.00,
     ]);
-    $concertB = $this->artist->concerts()->create([
+    $this->concertB = $this->artist->concerts()->create([
         'base_ticket_price' => 50.00,
     ]);
 
@@ -37,24 +36,19 @@ beforeEach(function () {
     // Total: 1,750 (56 tickets)
     for($i = 1; $i <= 7; $i++) {
         $today = Carbon::now()->addDays($i);
-        // dump("Day $i for ".$today->format('Y-m-d'));
         for ($j = 1; $j <= $i; $j++) {
-            // dump('$concertA'.": Ticket $j for " . $today->format('Y-m-d'));
-            $concertA->sales()->create([
-                'ticket_price' => $concertA->base_ticket_price,
+            $this->concertA->sales()->create([
+                'ticket_price' => $this->concertA->base_ticket_price,
                 'created_at' => $today,
             ]);
         }
         for ($j = 1; $j <= $i; $j++) {
-            // dump('$concertB'.": Ticket $j for " . $today->format('Y-m-d'));
-            $concertB->sales()->create([
-                'ticket_price' => $concertB->base_ticket_price,
+            $this->concertB->sales()->create([
+                'ticket_price' => $this->concertB->base_ticket_price,
                 'created_at' => $today,
             ]);
         }
     }
-
-    // dd(TicketSale::all()->toArray());
 });
 
 it('can generate a trailing seven day daily report', function () {
@@ -68,13 +62,32 @@ it('can generate a trailing seven day daily report', function () {
         'group_by' => '2024_07_02',
         'total_tickets_revenue' => 75.00,
         'total_tickets_sold_count' => 2,
+    ])
+        // Assuming too much?
+        ->and($report[6])->toMatchArray([
+            'group_type' => DailyReport::class,
+            'group_by_type' => Group::DAY->value,
+            'group_by' => '2024_07_08',
+            'total_tickets_revenue' => 525.00,
+            'total_tickets_sold_count' => 14,
+        ]);
+});
+
+it('can adjust the initial report accordingly', function () {
+    $this->concertA->sales()->create([
+        'ticket_price' => 100,  // Inflated price!
+        'created_at' => '2024-07-02',
     ]);
-    // Assuming too much?
-    expect($report[6])->toMatchArray([
+
+    $report = DailyReport::run()
+        ->where('group_by', '2024_07_02')
+        ->first();
+
+    expect($report->toArray())->toMatchArray([
         'group_type' => DailyReport::class,
         'group_by_type' => Group::DAY->value,
-        'group_by' => '2024_07_08',
-        'total_tickets_revenue' => 525.00,
-        'total_tickets_sold_count' => 14,
+        'group_by' => '2024_07_02',
+        'total_tickets_revenue' => 175.00,
+        'total_tickets_sold_count' => 3,
     ]);
 });

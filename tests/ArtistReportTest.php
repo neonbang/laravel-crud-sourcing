@@ -48,8 +48,6 @@ beforeEach(function () {
 });
 
 it('can create the artist report', function () {
-    // Some new updated data that should override our base data
-
     $report = ArtistReport::for($this->artist);
 
     expect($report)->not()->toBeNull();

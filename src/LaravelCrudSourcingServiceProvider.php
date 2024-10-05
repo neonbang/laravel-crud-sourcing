@@ -6,9 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
-use NeonBang\LaravelCrudSourcing\Commands\LaravelCrudSourcingCommand;
 use NeonBang\LaravelCrudSourcing\Models\Columns\ReportGroup;
-use NeonBang\LaravelCrudSourcing\Tests\Models\TicketSale;
 
 class LaravelCrudSourcingServiceProvider extends ServiceProvider
 {
@@ -57,12 +55,6 @@ class LaravelCrudSourcingServiceProvider extends ServiceProvider
                                 }
                             });
                         }
-
-                        // Event::listen('eloquent.'.$reportGroup->getEloquentEvent().': '.$reportGroup->getEloquentClass(), function ($model) use ($reportColumn, $subscription) {
-                        //     if (! config('crud-sourcing.bypass', false)) {
-                        //         $reportColumn->run($model, $subscription);
-                        //     }
-                        // });
                     }
                 } else {
                     foreach ($column->getEloquentEvents() as $event) {
@@ -84,28 +76,8 @@ class LaravelCrudSourcingServiceProvider extends ServiceProvider
                             }
                         });
                     }
-
-                    // Event::listen('eloquent.'.$column->getEloquentEvent().': '.$column->getEloquentClass(), function ($model) use ($column, $subscription) {
-                    //     if (! config('crud-sourcing.bypass', false)) {
-                    //         $column->run($model, $subscription);
-                    //     }
-                    // });
                 }
-                // Event::listen('eloquent.'.$event.': '.$subscriber->getModelClass(), function ($model) use ($subscriber) {
-                //     $subscriber->run($model);
-                // });
             }
         }
-
-        // foreach (config('crud-sourcing.model_metadata_map', []) as $model => $subscriptions) {
-        //     foreach ($subscriptions as $attribute => $subscription) {
-        //         $subscriber = new $subscription($attribute);
-        //         foreach (Arr::wrap($subscriber->getEloquentEvents()) as $event) {
-        //             Event::listen('eloquent.'.$event.': '.$subscriber->getModelClass(), function ($model) use ($subscriber) {
-        //                 $subscriber->run($model);
-        //             });
-        //         }
-        //     }
-        // }
     }
 }

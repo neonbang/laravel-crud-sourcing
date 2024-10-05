@@ -14,17 +14,6 @@ abstract class Aggregate extends Model
 
     public static function defaultData($model, $group = null): array
     {
-        // if ($path) {
-        //     dump([get_class($model),$path]);
-        //     $pieces = explode('.', $path);
-        //     $base = $model;
-        //     foreach ($pieces as $piece) {
-        //         $base = $base->$piece;
-        //     }
-        //     $model = $base;
-        //     dump(['model', $model->toArray()]);
-        // }
-
         if ($group) {
             return [
                 'group_type' => static::class,

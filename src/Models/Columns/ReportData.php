@@ -2,12 +2,9 @@
 
 namespace NeonBang\LaravelCrudSourcing\Models\Columns;
 
-use Closure;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use NeonBang\LaravelCrudSourcing\Jobs\QueueColumn;
-use NeonBang\LaravelCrudSourcing\Tests\Reports\ArtistReport;
 use NeonBang\LaravelCrudSourcing\Traits\EloquentEvents;
 use NeonBang\LaravelCrudSourcing\Traits\GroupableEvents;
 
@@ -50,11 +47,6 @@ class ReportData
         return $this->listenerCallback;
     }
 
-    // public function getRelatedModel($subjectModel)
-    // {
-    //     return $this->listenerCallback::getSubjectModel($subjectModel);
-    // }
-
     public function getSubjectPath(): ?string
     {
         return $this->subjectPath;
@@ -82,40 +74,20 @@ class ReportData
 
     public function insert($report, $column, $value = null)
     {
-        // $record is the subject of the Report
-        // if ($this->subjectPath) {
-        //     try {
-        //         $pieces = explode('.', $this->subjectPath);
-        //         $base = $this->record;
-        //         foreach ($pieces as $piece) {
-        //             $base = $base->load($piece)->$piece;
-        //         }
-        //         $record = $base;
-        //     } catch (\Exception $e) {
-        //         dd(['CAUGHT', get_class($this->record), $e->getMessage(), $this->subjectPath]);
-        //     }
-        //
-        // } else {
-        //     $record = $this->record;
-        // }
-        // $record = ! $this->rebuilding ? $this->record : $this->listenerCallback::subjectModelNormalizer($this->record);
-
-        $record = $this->record;
-
+        // @todo Ick
         if ($value && $this->attribute) {
             $value = $value->{$this->attribute};
         }
 
         if ($this->transformer) {
             $transformer = new $this->transformer;
+            // @todo Ick
             $data = $transformer($this->rebuilding || $this->isGrouped() ? $value : $this->record);
         } else {
             $data = method_exists($report, $insertMethod = 'get'.Str::of($column->getColumnName())->studly()->toString().'Data')
                 ? $report::$insertMethod($value)
                 : [$column->getColumnName() => $value];
         }
-
-        // dump(['DATA', $report::defaultData($record, $this->groupBy), $data]);
 
         $report::query()
             ->updateOrCreate($report::defaultData($this->subject, $this->groupBy), $data);
@@ -135,25 +107,6 @@ class ReportData
 
     public function rebuildFrom(mixed $subjectModel, mixed $report, string $relationshipTrace = null): void
     {
-
-        // if ($this->subjectPath) {
-        //     try {
-        //         $pieces = explode('.', $this->subjectPath);
-        //         $base = $model;
-        //         foreach ($pieces as $piece) {
-        //             $base = $base->load($piece)->$piece;
-        //         }
-        //         $eventModel = $base;
-        //     } catch (\Exception $e) {
-        //         dd(['CAUGHT', $e->getMessage(), $this->subjectPath, get_class($model)]);
-        //     }
-        //
-        // } else {
-        //     $eventModel = $model;
-        // }
-
-        // $eventModel = $model;
-
         $this->run($subjectModel, $report,  $subjectModel, true);
     }
 
