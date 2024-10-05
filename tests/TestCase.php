@@ -21,7 +21,7 @@ abstract class TestCase extends OrchestraTestCase
     public function getEnvironmentSetUp($app)
     {
         config()->set('crud-sourcing.reports', [
-            // ArtistReport::class,
+            ArtistReport::class,
             DailyReport::class,
         ]);
 
@@ -114,6 +114,7 @@ abstract class TestCase extends OrchestraTestCase
         Schema::create('report_daily_data', function (Blueprint $table) {
             $table->increments('id');
             $table->string('group_type')->index();
+            $table->string('group_by_type')->index();
             $table->string('group_by')->index();
             $table->float('total_tickets_revenue')->default(0.00);
             $table->integer('total_tickets_sold_count')->default(0);

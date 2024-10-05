@@ -28,6 +28,7 @@ abstract class Aggregate extends Model
         if ($group) {
             return [
                 'group_type' => static::class,
+                'group_by_type' => $group->value,
                 'group_by' => $model->created_at->format('Y_m_d'),
             ];
         }

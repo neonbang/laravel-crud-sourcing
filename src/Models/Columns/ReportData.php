@@ -108,15 +108,14 @@ class ReportData
 
         if ($this->transformer) {
             $transformer = new $this->transformer;
-            $data = $transformer($this->rebuilding ? $value : $this->record);
-            dump($data);
+            $data = $transformer($this->rebuilding || $this->isGrouped() ? $value : $this->record);
         } else {
             $data = method_exists($report, $insertMethod = 'get'.Str::of($column->getColumnName())->studly()->toString().'Data')
                 ? $report::$insertMethod($value)
                 : [$column->getColumnName() => $value];
         }
 
-        dump(['DATA', $report::defaultData($record, $this->groupBy), $data]);
+        // dump(['DATA', $report::defaultData($record, $this->groupBy), $data]);
 
         $report::query()
             ->updateOrCreate($report::defaultData($this->subject, $this->groupBy), $data);
