@@ -47,6 +47,22 @@ abstract class Aggregate extends Model
         return $model->id;
     }
 
+    public static function rebuildFrom(\DateTimeInterface $since)
+    {
+        foreach (static::columns() as $column) {
+            if ($column instanceof ReportGroup) {
+                $reportGroup = $column;
+                foreach ($reportGroup->getColumns() as $reportColumn) {
+                    foreach($reportGroup->getEloquentEvents() as $event) {
+                        $reportColumn->regroupFrom($event['model'], static::class, $reportGroup->getGroupBy(), $since);
+                    }
+                }
+            } else {
+                $column->rebuildFrom($column, static::class);
+            }
+        }
+    }
+
     public static function rebuildFor(Model $model)
     {
         // Remove the entry to rebuild it

@@ -3,7 +3,9 @@
 namespace NeonBang\LaravelCrudSourcing\Models\Columns;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
+use NeonBang\LaravelCrudSourcing\Enums\Group;
 use NeonBang\LaravelCrudSourcing\Jobs\QueueColumn;
 use NeonBang\LaravelCrudSourcing\Traits\EloquentEvents;
 use NeonBang\LaravelCrudSourcing\Traits\GroupableEvents;
@@ -108,6 +110,30 @@ class ReportData
     public function rebuildFrom(mixed $subjectModel, mixed $report, string $relationshipTrace = null): void
     {
         $this->run($subjectModel, $report,  $subjectModel, true);
+    }
+
+    public function regroupFrom(mixed $subjectModel, mixed $report, $group, $since): void
+    {
+        /** @var Carbon $start */
+        $start = $since;
+        $end = now();
+
+        // Use "from" and "group" to create a loop to send the $subscriber->group()
+        $incrementByMinutes = match ($group) {
+            Group::DAY => 60 * 24,
+        };
+
+        while ($start->startOfDay()->lessThanOrEqualTo($end->startOfDay())) {
+            if ($group) {
+                $this->by($group);
+            }
+
+            $modelStubForRebuild = new $subjectModel(['created_at' => $start]);
+
+            $this->run($modelStubForRebuild, $report,  $modelStubForRebuild, true);
+
+            $start->addMinutes($incrementByMinutes);
+        }
     }
 
     public function run(mixed $model, mixed $report, mixed $subjectModel = null, bool $rebuild = false): void

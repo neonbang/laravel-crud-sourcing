@@ -91,3 +91,31 @@ it('can adjust the initial report accordingly', function () {
         'total_tickets_sold_count' => 3,
     ]);
 });
+
+it('can rebuild the daily ticket sales report', function () {
+    DailyReport::query()->truncate();
+
+    Carbon::setTestNow(Carbon::parse('2024-07-09'));
+
+    DailyReport::rebuildFrom(Carbon::parse('2024-07-02'));
+
+    $report = DailyReport::run()
+        ->orderBy('id')
+        ->get();
+
+    expect($report[0])->toMatchArray([
+        'group_type' => DailyReport::class,
+        'group_by_type' => Group::DAY->value,
+        'group_by' => '2024_07_02',
+        'total_tickets_revenue' => 75.00,
+        'total_tickets_sold_count' => 2,
+    ])
+        // Assuming too much?
+        ->and($report[6])->toMatchArray([
+            'group_type' => DailyReport::class,
+            'group_by_type' => Group::DAY->value,
+            'group_by' => '2024_07_08',
+            'total_tickets_revenue' => 525.00,
+            'total_tickets_sold_count' => 14,
+        ]);
+});
