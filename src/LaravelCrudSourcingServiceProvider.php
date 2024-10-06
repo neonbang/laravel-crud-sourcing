@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use NeonBang\LaravelCrudSourcing\Facades\LaravelCrudSourcing as LaravelCrudSourcingConfig;
 use NeonBang\LaravelCrudSourcing\Models\Columns\ReportGroup;
 
 class LaravelCrudSourcingServiceProvider extends ServiceProvider
@@ -34,6 +35,10 @@ class LaravelCrudSourcingServiceProvider extends ServiceProvider
                     foreach ($reportGroup->getColumns() as $reportColumn) {
                         foreach ($reportGroup->getEloquentEvents() as $event) {
                             Event::listen('eloquent.'.$event['event'].': '.$event['model'], function ($model) use ($event, $reportColumn, $reportGroup, $subscription) {
+                                if (LaravelCrudSourcingConfig::isDisabled($subscription)) {
+                                    return;
+                                }
+
                                 if (! config('crud-sourcing.bypass', false)) {
                                     if ($reportColumn->getSubjectPath() || isset($event['trace'])) {
                                         $pieces = explode('.', $reportColumn->getSubjectPath() ?? $event['trace']);
@@ -59,6 +64,10 @@ class LaravelCrudSourcingServiceProvider extends ServiceProvider
                 } else {
                     foreach ($column->getEloquentEvents() as $event) {
                         Event::listen('eloquent.'.$event['event'].': '.$event['model'], function ($model) use ($event, $column, $subscription) {
+                            if (LaravelCrudSourcingConfig::isDisabled($subscription)) {
+                                return;
+                            }
+
                             if (! config('crud-sourcing.bypass', false)) {
                                 if (isset($event['trace'])) {
                                     $pieces = explode('.', $event['trace']);
@@ -79,5 +88,12 @@ class LaravelCrudSourcingServiceProvider extends ServiceProvider
                 }
             }
         }
+    }
+
+    public function register()
+    {
+        $this->app->singleton(LaravelCrudSourcingConfig::class, function ($app) {
+            return new LaravelCrudSourcingConfig();
+        });
     }
 }

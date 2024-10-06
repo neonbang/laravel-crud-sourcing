@@ -2,11 +2,15 @@
 
 use Illuminate\Support\Carbon;
 use NeonBang\LaravelCrudSourcing\Enums\Group;
+use NeonBang\LaravelCrudSourcing\Facades\LaravelCrudSourcing;
 use NeonBang\LaravelCrudSourcing\Tests\Models\Artist;
 use NeonBang\LaravelCrudSourcing\Tests\Models\RecordLabel;
+use NeonBang\LaravelCrudSourcing\Tests\Reports\ArtistReport;
 use NeonBang\LaravelCrudSourcing\Tests\Reports\DailyReport;
 
 beforeEach(function () {
+    LaravelCrudSourcing::disable(ArtistReport::class);
+
     Carbon::setTestNow('2024-07-01');
 
     RecordLabel::create(['name' => 'Foo Bar Records']);
