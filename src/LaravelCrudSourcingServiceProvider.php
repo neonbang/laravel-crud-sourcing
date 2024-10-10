@@ -14,14 +14,14 @@ class LaravelCrudSourcingServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->publishes([
-            __DIR__.'/../config/crud-sourcing.php' => config_path('crud-sourcing.php'),
+            __DIR__ . '/../config/crud-sourcing.php' => config_path('crud-sourcing.php'),
         ], 'laravel-crud-sourcing-config');
 
         foreach (config('crud-sourcing.models', []) as $model => $subscriptions) {
             foreach ($subscriptions as $attribute => $subscription) {
                 $subscriber = new $subscription($attribute);
                 foreach (Arr::wrap($subscriber->getEloquentEvents()) as $event) {
-                    Event::listen('eloquent.'.$event.': '.$subscriber->getModelClass(), function ($model) use ($subscriber) {
+                    Event::listen('eloquent.' . $event . ': ' . $subscriber->getModelClass(), function ($model) use ($subscriber) {
                         $subscriber->run($model);
                     });
                 }
@@ -34,41 +34,41 @@ class LaravelCrudSourcingServiceProvider extends ServiceProvider
                     $reportGroup = $column;
                     foreach ($reportGroup->getColumns() as $reportColumn) {
                         foreach ($reportGroup->getEloquentEvents() as $event) {
-                            Event::listen('eloquent.'.$event['event'].': '.$event['model'], function ($model) use ($event, $reportColumn, $reportGroup, $subscription) {
+                            Event::listen('eloquent.' . $event['event'] . ': ' . $event['model'], function ($eventModel) use ($event, $reportColumn, $reportGroup, $subscription) {
                                 if (LaravelCrudSourcingConfig::isDisabled($subscription)) {
                                     return;
                                 }
 
-                                if (! config('crud-sourcing.bypass', false)) {
+                                if (!config('crud-sourcing.bypass', false)) {
                                     if ($reportColumn->getSubjectPath() || isset($event['trace'])) {
                                         $pieces = explode('.', $reportColumn->getSubjectPath() ?? $event['trace']);
-                                        $base = $model;
+                                        $base = $eventModel;
                                         foreach ($pieces as $piece) {
                                             /** @var Model $base */
                                             $base = $base->loadMissing($piece)->$piece;
                                         }
-                                        $subject = $base;
+                                        $baseReportModel = $base;
                                     } else {
-                                        $subject = $model;
+                                        $baseReportModel = $eventModel;
                                     }
 
                                     if ($reportGroup->isGrouped()) {
                                         $reportColumn->by($reportGroup->getGroupBy());
                                     }
 
-                                    $reportColumn->run($model, $subscription, $subject);
+                                    $reportColumn->run($baseReportModel, $subscription, $eventModel);
                                 }
                             });
                         }
                     }
                 } else {
                     foreach ($column->getEloquentEvents() as $event) {
-                        Event::listen('eloquent.'.$event['event'].': '.$event['model'], function ($model) use ($event, $column, $subscription) {
+                        Event::listen('eloquent.' . $event['event'] . ': ' . $event['model'], function ($model) use ($event, $column, $subscription) {
                             if (LaravelCrudSourcingConfig::isDisabled($subscription)) {
                                 return;
                             }
 
-                            if (! config('crud-sourcing.bypass', false)) {
+                            if (!config('crud-sourcing.bypass', false)) {
                                 if (isset($event['trace'])) {
                                     $pieces = explode('.', $event['trace']);
                                     $base = $model;

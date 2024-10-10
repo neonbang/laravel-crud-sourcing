@@ -55,7 +55,7 @@ abstract class Aggregate extends Model
             if ($column instanceof ReportGroup) {
                 $reportGroup = $column;
                 foreach ($reportGroup->getColumns() as $reportColumn) {
-                    foreach($reportGroup->getEloquentEvents() as $event) {
+                    foreach ($reportGroup->getEloquentEvents() as $event) {
                         $reportColumn->regroupFrom($event['model'], static::class, $reportGroup->getGroupBy(), $since);
                     }
                 }
@@ -65,23 +65,29 @@ abstract class Aggregate extends Model
         }
     }
 
-    public static function rebuildFor(Model $model)
+    public static function rebuildFor(Model $baseReportModel)
     {
         // Remove the entry to rebuild it
-        static::query()->where(static::getOwner(), static::getOwnerValue($model))->delete();
+        static::query()->where(static::getOwner(), static::getOwnerValue($baseReportModel))->delete();
 
         foreach (static::columns() as $column) {
             if ($column instanceof ReportGroup) {
                 $reportGroup = $column;
-                foreach ($reportGroup->getColumns() as $reportColumn) {
-                    $reportColumn->rebuildFrom($model, static::class);
+                foreach ($reportGroup->getEloquentEvents() as $event) {
+                    foreach ($reportGroup->getColumns() as $reportColumn) {
+                        $reportColumn->rebuildFrom($baseReportModel, static::class, $event['model']);
+                    }
                 }
+
             } else {
-                $column->rebuildFrom($model, static::class);
+                foreach ($column->getEloquentEvents() as $event) {
+                    $column->rebuildFrom($baseReportModel, static::class, new $event['model']);
+                }
+
             }
         }
 
-        return self::query()->where(static::getOwner(), static::getOwnerValue($model))->first();
+        return self::query()->where(static::getOwner(), static::getOwnerValue($baseReportModel))->first();
     }
 
     public function setEventModel(Model $model): void

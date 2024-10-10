@@ -46,7 +46,6 @@ beforeEach(function () {
 });
 
 it('can create the artist report', function () {
-    dump('can create the artist report');
     $report = ArtistReport::for($this->artist);
 
     expect($report)->not()->toBeNull();
@@ -55,11 +54,9 @@ it('can create the artist report', function () {
     expect($report->next_album_title)->toBe('Introducting The Bashdogs');
     expect($report->total_tickets_revenue)->toBe(375.00);
     expect($report->total_tickets_sold_count)->toBe(15);
-    dump('done: can create the artist report');
 });
 
 it('can rebuild the artist', function () {
-    dump('can rebuild the artist');
     ArtistReport::query()->truncate();
 
     ArtistReport::rebuildFor($this->artist);
@@ -72,5 +69,4 @@ it('can rebuild the artist', function () {
     expect($report->next_album_title)->toBe('Introducting The Bashdogs');
     expect($report->total_tickets_revenue)->toBe(375.00);
     expect($report->total_tickets_sold_count)->toBe(15);
-    dump('done: can rebuild the artist');
 });

@@ -3,7 +3,6 @@
 namespace NeonBang\LaravelCrudSourcing\Tests\Reports;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Carbon;
 use NeonBang\LaravelCrudSourcing\Models\Aggregate;
 use NeonBang\LaravelCrudSourcing\Models\Columns\ReportData;
 use NeonBang\LaravelCrudSourcing\Models\Columns\ReportGroup;

@@ -23,9 +23,9 @@ class ReportData
 
     protected ?string $subjectPath = null;
 
-    protected ?Model $record = null;
+    protected mixed $record = null;
 
-    protected ?Model $subject = null;
+    protected mixed $subject = null;
 
     protected mixed $transformer = null;
 
@@ -59,10 +59,10 @@ class ReportData
         $listener = new $this->listenerCallback;
 
         $userReport = new $report;
-        $userReport->setEventModel($this->record);
+        // $userReport->setEventModel($this->record);
 
         // If the subscriber has conditional logic on whether or not it should "include" the Event Model
-        if (method_exists($listener, 'include')) {
+        if ($this->record instanceof Model && method_exists($listener, 'include')) {
             if (!$listener->include($this->record)) {
                 return;
             }
@@ -71,7 +71,7 @@ class ReportData
         if ($this->isGrouped()) {
             $data = $listener->group($this->record);
         } else {
-            $data = $listener->scope($this->record, $this->subject);
+            $data = $listener->scope($this->subject, $this->record);
         }
 
         // $this->insert($report, $this, $data);
@@ -131,9 +131,9 @@ class ReportData
         return $this;
     }
 
-    public function rebuildFrom(mixed $subjectModel, mixed $report, string $relationshipTrace = null): void
+    public function rebuildFrom(mixed $baseReportModel, mixed $report, string $eventModel = null): void
     {
-        $this->run($subjectModel, $report, $subjectModel, true);
+        $this->run($baseReportModel, $report, $eventModel, true);
     }
 
     public function regroupFrom(mixed $subjectModel, mixed $report, $group, $since): void
@@ -160,13 +160,12 @@ class ReportData
         }
     }
 
-    public function run(mixed $model, mixed $report, mixed $subjectModel = null, bool $rebuild = false): void
+    public function run(mixed $baseReportModel, mixed $report, mixed $eventModel = null, bool $rebuild = false): void
     {
-        // dd($report, get_class($model));
         $this->rebuilding = $rebuild;
 
-        $this->record = $model;
-        $this->subject = $subjectModel;
+        $this->record = $eventModel;
+        $this->subject = $baseReportModel;
 
         QueueColumn::dispatch($this, $report);
     }
