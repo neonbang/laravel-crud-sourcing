@@ -8,6 +8,8 @@ use NeonBang\LaravelCrudSourcing\Models\Columns\ReportGroup;
 
 abstract class Aggregate extends Model
 {
+    protected Model $eventModel;
+
     protected $guarded = [];
 
     abstract public static function columns(): array;
@@ -80,5 +82,10 @@ abstract class Aggregate extends Model
         }
 
         return self::query()->where(static::getOwner(), static::getOwnerValue($model))->first();
+    }
+
+    public function setEventModel(Model $model): void
+    {
+        $this->eventModel = $model;
     }
 }

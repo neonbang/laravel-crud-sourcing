@@ -58,15 +58,35 @@ class ReportData
     {
         $listener = new $this->listenerCallback;
 
-        if ($this->rebuilding || $listener->include($this->record)) {
-            if ($this->isGrouped()) {
-                $data = $listener->group($this->record);
-            } else {
-                $data = $listener->scope($this->record, $this->subject);
-            }
+        $userReport = new $report;
+        $userReport->setEventModel($this->record);
 
-            $this->insert($report, $this, $data);
+        // If the subscriber has conditional logic on whether or not it should "include" the Event Model
+        if (method_exists($listener, 'include')) {
+            if (!$listener->include($this->record)) {
+                return;
+            }
         }
+
+        if ($this->isGrouped()) {
+            $data = $listener->group($this->record);
+        } else {
+            $data = $listener->scope($this->record, $this->subject);
+        }
+
+        // $this->insert($report, $this, $data);
+        $this->insert($userReport, $this, $data);
+
+        // if ($this->rebuilding || $listener->include($this->record)) {
+        //     if ($this->isGrouped()) {
+        //         $data = $listener->group($this->record);
+        //     } else {
+        //         $data = $listener->scope($this->record, $this->subject);
+        //     }
+        //
+        //     // $this->insert($report, $this, $data);
+        //     $this->insert($userReport, $this, $data);
+        // }
     }
 
     public function getColumnName(): string
@@ -86,13 +106,17 @@ class ReportData
             // @todo Ick
             $data = $transformer($this->rebuilding || $this->isGrouped() ? $value : $this->record);
         } else {
-            $data = method_exists($report, $insertMethod = 'get'.Str::of($column->getColumnName())->studly()->toString().'Data')
+            $data = method_exists($report, $insertMethod = 'get' . Str::of($column->getColumnName())->studly()->toString() . 'Data')
                 ? $report::$insertMethod($value)
                 : [$column->getColumnName() => $value];
         }
 
+        $defaults = method_exists($report, 'mergeDefaultData')
+            ? $report->mergeDefaultData($this->subject, $this->groupBy)
+            : $report::defaultData($this->subject, $this->groupBy);
+
         $report::query()
-            ->updateOrCreate($report::defaultData($this->subject, $this->groupBy), $data);
+            ->updateOrCreate($defaults, $data);
     }
 
     public function subjectPath(string $subjectPath): ReportData
@@ -109,7 +133,7 @@ class ReportData
 
     public function rebuildFrom(mixed $subjectModel, mixed $report, string $relationshipTrace = null): void
     {
-        $this->run($subjectModel, $report,  $subjectModel, true);
+        $this->run($subjectModel, $report, $subjectModel, true);
     }
 
     public function regroupFrom(mixed $subjectModel, mixed $report, $group, $since): void
@@ -130,7 +154,7 @@ class ReportData
 
             $modelStubForRebuild = new $subjectModel(['created_at' => $start]);
 
-            $this->run($modelStubForRebuild, $report,  $modelStubForRebuild, true);
+            $this->run($modelStubForRebuild, $report, $modelStubForRebuild, true);
 
             $start->addMinutes($incrementByMinutes);
         }
@@ -138,6 +162,7 @@ class ReportData
 
     public function run(mixed $model, mixed $report, mixed $subjectModel = null, bool $rebuild = false): void
     {
+        // dd($report, get_class($model));
         $this->rebuilding = $rebuild;
 
         $this->record = $model;
