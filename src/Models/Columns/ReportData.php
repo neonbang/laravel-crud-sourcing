@@ -59,7 +59,10 @@ class ReportData
         $listener = new $this->listenerCallback;
 
         $userReport = new $report;
-        // $userReport->setEventModel($this->record);
+
+        if ($this->record instanceof Model || $this->subject instanceof Model) {
+            $userReport->setEventModel($this->record instanceof Model ? $this->record : $this->subject);
+        }
 
         // If the subscriber has conditional logic on whether or not it should "include" the Event Model
         if ($this->record instanceof Model && method_exists($listener, 'include')) {
@@ -71,7 +74,7 @@ class ReportData
         if ($this->isGrouped()) {
             $data = $listener->group($this->record);
         } else {
-            $data = $listener->scope($this->subject, $this->record);
+            $data = $listener->scope($this->subject, $this->record, $this->rebuilding);
         }
 
         // $this->insert($report, $this, $data);
@@ -115,6 +118,7 @@ class ReportData
             ? $report->mergeDefaultData($this->subject, $this->groupBy)
             : $report::defaultData($this->subject, $this->groupBy);
 
+        dump($defaults, $data);
         $report::query()
             ->updateOrCreate($defaults, $data);
     }
@@ -158,6 +162,11 @@ class ReportData
 
             $start->addMinutes($incrementByMinutes);
         }
+    }
+
+    public function handle()
+    {
+        //
     }
 
     public function run(mixed $baseReportModel, mixed $report, mixed $eventModel = null, bool $rebuild = false): void

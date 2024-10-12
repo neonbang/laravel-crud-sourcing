@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use NeonBang\LaravelCrudSourcing\Models\Columns\ReportGroup;
 
-abstract class Aggregate extends Model
+abstract class Projection extends Model
 {
     protected Model $eventModel;
 
