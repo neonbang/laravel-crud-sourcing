@@ -31,7 +31,14 @@ abstract class Projection extends Model
 
     public static function for(Model $model): static|Model
     {
-        return self::query()->where(static::getOwner(), static::getOwnerValue($model))->first();
+        return self::query()->where(static::getCompositeKey($model))->first();
+    }
+
+    public static function getCompositeKey(Model $baseModel, ?Model $eventModel = null): array
+    {
+        return [
+            'id' => $baseModel->id,
+        ];
     }
 
     public static function run(): Builder
@@ -71,23 +78,14 @@ abstract class Projection extends Model
         // static::query()->where(static::getOwner(), static::getOwnerValue($baseReportModel))->delete();
 
         foreach (static::columns() as $column) {
-            if ($column instanceof ReportGroup) {
-                $reportGroup = $column;
-                foreach ($reportGroup->getEloquentEvents() as $event) {
-                    foreach ($reportGroup->getColumns() as $reportColumn) {
-                        $reportColumn->rebuildFrom($baseReportModel, static::class, $event['model']);
-                    }
-                }
+            $column->queueRebuild($baseReportModel, static::class);
 
-            } else {
-                foreach ($column->getEloquentEvents() as $event) {
-                    $column->rebuildFrom($baseReportModel, static::class, new $event['model']);
-                }
-
+            foreach ($column->getEloquentEvents() as $event) {
+                //
             }
         }
 
-        return self::query()->where(static::getOwner(), static::getOwnerValue($baseReportModel))->first();
+        return self::for($baseReportModel);
     }
 
     public static function recalculateFor(Model $eventModel): void

@@ -11,7 +11,7 @@ use NeonBang\LaravelCrudSourcing\Aggregates\BelongsToBase;
 use NeonBang\LaravelCrudSourcing\Aggregates\HasManyFromBase;
 use NeonBang\LaravelCrudSourcing\Models\Columns\ReportData;
 
-class QueueColumn implements ShouldQueue
+class QueueRebuild implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -24,6 +24,6 @@ class QueueColumn implements ShouldQueue
 
     public function handle(): void
     {
-        $this->subscriber->handle();
+        $this->subscriber->rebuild();
     }
 }

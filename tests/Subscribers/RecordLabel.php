@@ -12,9 +12,9 @@ class RecordLabel
         return $builder;
     }
 
-    public function find(Model $eventModel)
+    public function find(Model $eventWhenRootEventButBaseWhenRebuildingModel)
     {
-        return RecordLabelModel::find($eventModel->record_label_id);
+        return RecordLabelModel::find($eventWhenRootEventButBaseWhenRebuildingModel->record_label_id);
     }
 
     public function scope(Model $baseReportModel, Model|string $eventModel = null): mixed

@@ -6,6 +6,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use NeonBang\LaravelCrudSourcing\Aggregates\BelongsToBase;
+use NeonBang\LaravelCrudSourcing\Aggregates\HasManyFromBase;
 use NeonBang\LaravelCrudSourcing\Facades\LaravelCrudSourcing as LaravelCrudSourcingConfig;
 
 class LaravelCrudSourcingServiceProvider extends ServiceProvider
@@ -29,14 +30,13 @@ class LaravelCrudSourcingServiceProvider extends ServiceProvider
 
         foreach (config('crud-sourcing.reports', []) as $subscription) {
             foreach ($subscription::columns() as $column) {
-                if ($column instanceof BelongsToBase) {
+                if ($column instanceof BelongsToBase || $column instanceof HasManyFromBase) {
                     foreach ($column->getEloquentEvents() as $event) {
                         Event::listen('eloquent.' . $event['event'] . ': ' . $event['model'], function ($eventModel) use ($event, $column, $subscription) {
                             if (LaravelCrudSourcingConfig::isDisabled($subscription)) {
                                 return;
                             }
-                            // We have the Event Model...
-                            // Get the path to the Base Model
+
                             $baseModelReference = isset($event['trace'])
                                 ? dedot($event['trace'], $eventModel)
                                 : $eventModel;

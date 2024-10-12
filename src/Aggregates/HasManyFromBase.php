@@ -7,7 +7,7 @@ use NeonBang\LaravelCrudSourcing\Jobs\QueueColumn;
 use NeonBang\LaravelCrudSourcing\Jobs\QueueRebuild;
 use NeonBang\LaravelCrudSourcing\Traits\EloquentEvents;
 
-class BelongsToBase
+class HasManyFromBase
 {
     use EloquentEvents;
 
@@ -19,6 +19,7 @@ class BelongsToBase
     private mixed $report;
     private mixed $baseModel;
     private string $eventType;
+    private string $transformerClass;
 
     public function __construct(protected string $identifier)
     {
@@ -29,41 +30,19 @@ class BelongsToBase
         return new static($identifier);
     }
 
-    public function rebuild()
-    {
-        $handler = new $this->handlerClass;
-
-        $scope = $handler->find($this->baseModel);
-
-        if ($this->key) {
-            $this->persistByColumn($this->identifier, $scope->{$this->key}, $this->baseModel, $scope);
-        }
-    }
-
     public function handle(): void
     {
         $method = match ($this->eventType) {
-            'relationship' => 'collect',
+            'relationship' => 'scope',
             default => 'find'
         };
 
         $handler = new $this->handlerClass;
 
-        if ($method === 'collect') {
-            $handler->$method($this->baseModel, $this->eventModel)->each(function (Model $base) use ($handler) {
-                $scope = $handler->find($base);
+        $transformer = new $this->transformerClass;
+        $data = $transformer($handler->$method($this->baseModel));
 
-                if ($this->key) {
-                    $this->persistByColumn($this->identifier, $scope->{$this->key}, $base);
-                }
-            });
-        } else {
-            $scope = $handler->$method($this->eventModel);
-
-            if ($this->key) {
-                $this->persistByColumn($this->identifier, $scope->{$this->key}, $this->eventModel);
-            }
-        }
+        $this->persist($data);
 
 
         // $listener = new $this->listenerCallback;
@@ -125,11 +104,33 @@ class BelongsToBase
         QueueRebuild::dispatch($this);
     }
 
-    protected function persistByColumn(string $column, mixed $value, Model $baseModel, Model $eventModel = null): void
+    public function rebuild()
     {
-        $defaults = $this->report::getCompositeKey($baseModel, $eventModel ?: $this->eventModel);
+        $handler = new $this->handlerClass;
+
+        $transformer = new $this->transformerClass;
+        $data = $transformer($handler->scope($this->baseModel));
+
+        $this->persist($data);
+    }
+
+    public function transformer(string $transformer): self
+    {
+        $this->transformerClass = $transformer;
+
+        return $this;
+    }
+
+    protected function persist(array $data, Model $baseModel = null, Model $eventModel = null): void
+    {
+        $defaults = $this->report::getCompositeKey($baseModel ?: $this->baseModel, $eventModel);
 
         $this->report::query()
-            ->updateOrCreate($defaults, [$column => $value]);
+            ->updateOrCreate($defaults, $data);
+    }
+
+    protected function persistByColumn(string $column, mixed $value, Model $baseModel, Model $eventModel = null): void
+    {
+        $this->persist([$column => $value]);
     }
 }

@@ -6,6 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class NextAlbum
 {
+    public function for($model)
+    {
+        dd(get_class($model));
+    }
+
     public function include($model): bool
     {
         if (!$model->release_date) {
@@ -21,9 +26,9 @@ class NextAlbum
         return true;
     }
 
-    public function scope(Model $baseReportModel, Model|string $eventModel = null): mixed
+    public function scope(Model $baseModel)
     {
-        return $baseReportModel->albums()->orderBy('release_date', 'desc')->first();
+        return $baseModel->albums()->orderBy('release_date', 'desc')->first();
     }
 
     // public function scope(Album|Model $needsToBeAlbum, $needsToBeArtist = null): mixed
