@@ -5,6 +5,7 @@ namespace NeonBang\LaravelCrudSourcing\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use NeonBang\LaravelCrudSourcing\Models\Columns\ReportGroup;
+use function NeonBang\LaravelCrudSourcing\dedot;
 
 abstract class Projection extends Model
 {
@@ -86,6 +87,33 @@ abstract class Projection extends Model
         }
 
         // return self::for($baseReportModel);
+    }
+    
+    public static function rebuildBy(Model $sourceModel)
+    {
+        // Remove the entry to rebuild it
+        // static::query()->where(static::getOwner(), static::getOwnerValue($baseReportModel))->delete();
+        
+        foreach (static::columns() as $column) {
+            // $column->queueRebuild($sourceModel, static::class);
+            
+            foreach ($column->getEloquentEvents() as $event) {
+                if ($event['model'] === get_class($sourceModel)) {
+                    $baseModelReference = isset($event['trace'])
+                        ? dedot($event['trace'], $sourceModel)
+                        : $sourceModel;
+                    
+                    $column->queueRebuild($baseModelReference, static::class, $sourceModel);
+                }
+            }
+        }
+        
+        // return self::for($baseReportModel);
+    }
+    
+    public static function getBase(): string|null
+    {
+        return static::$baseModel ?? null;
     }
 
     public static function recalculateFor(Model $eventModel): void

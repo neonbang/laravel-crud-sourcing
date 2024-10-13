@@ -97,12 +97,13 @@ class HasManyFromBase
         QueueColumn::dispatch($this);
     }
 
-    public function queueRebuild(mixed $baseModelReference, mixed $report): void
+    public function queueRebuild(mixed $baseModelReference, mixed $report, mixed $eventModel = null): void
     {
         $this->rebuilding = true;
 
         $this->report = $report;
         $this->baseModel = $baseModelReference;
+        $this->eventModel = $eventModel;
 
         QueueRebuild::dispatch($this);
     }
