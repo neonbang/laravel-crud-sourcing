@@ -15,7 +15,7 @@ class HasManyFromBase
 
     protected ?string $key = null;
     private bool $rebuilding;
-    private mixed $eventModel;
+    private mixed $eventModel = null;
     private mixed $report;
     private mixed $baseModel;
     private string $eventType;
@@ -40,10 +40,13 @@ class HasManyFromBase
         $handler = new $this->handlerClass;
 
         $transformer = new $this->transformerClass;
-        $data = $transformer($handler->$method($this->baseModel));
 
-        $this->persist($data);
+        $raw = $handler->$method($this->baseModel, $this->eventModel);
 
+        if ($raw) {
+            $data = $transformer($raw);
+            $this->persist($data);
+        }
 
         // $listener = new $this->listenerCallback;
         //
@@ -109,9 +112,19 @@ class HasManyFromBase
         $handler = new $this->handlerClass;
 
         $transformer = new $this->transformerClass;
-        $data = $transformer($handler->scope($this->baseModel));
 
-        $this->persist($data);
+        $raw = $handler->scope($this->baseModel, $this->eventModel);
+
+        if ($raw) {
+            if (method_exists($handler, 'rebuildLoop')) {
+                $handler->rebuildLoop($raw, $transformer, function ($data, $baseModel, $eventModel) {
+                    $this->persist($data, $baseModel, $eventModel);
+                });
+            } else {
+                $data = $transformer($raw);
+                $this->persist($data);
+            }
+        }
     }
 
     public function transformer(string $transformer): self
@@ -123,7 +136,7 @@ class HasManyFromBase
 
     protected function persist(array $data, Model $baseModel = null, Model $eventModel = null): void
     {
-        $defaults = $this->report::getCompositeKey($baseModel ?: $this->baseModel, $eventModel);
+        $defaults = $this->report::getCompositeKey($baseModel ?: $this->baseModel, $eventModel ?: $this->eventModel);
 
         $this->report::query()
             ->updateOrCreate($defaults, $data);

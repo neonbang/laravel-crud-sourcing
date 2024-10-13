@@ -85,7 +85,7 @@ abstract class Projection extends Model
             }
         }
 
-        return self::for($baseReportModel);
+        // return self::for($baseReportModel);
     }
 
     public static function recalculateFor(Model $eventModel): void
