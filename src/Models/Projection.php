@@ -5,8 +5,9 @@ namespace NeonBang\LaravelCrudSourcing\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use NeonBang\LaravelCrudSourcing\Models\Columns\ReportGroup;
+use function NeonBang\LaravelCrudSourcing\dedot;
 
-abstract class Aggregate extends Model
+abstract class Projection extends Model
 {
     protected Model $eventModel;
 
@@ -31,7 +32,14 @@ abstract class Aggregate extends Model
 
     public static function for(Model $model): static|Model
     {
-        return self::query()->where(static::getOwner(), static::getOwnerValue($model))->first();
+        return self::query()->where(static::getCompositeKey($model))->first();
+    }
+
+    public static function getCompositeKey(Model $baseModel, ?Model $eventModel = null): array
+    {
+        return [
+            'id' => $baseModel->id,
+        ];
     }
 
     public static function run(): Builder
@@ -71,23 +79,41 @@ abstract class Aggregate extends Model
         // static::query()->where(static::getOwner(), static::getOwnerValue($baseReportModel))->delete();
 
         foreach (static::columns() as $column) {
-            if ($column instanceof ReportGroup) {
-                $reportGroup = $column;
-                foreach ($reportGroup->getEloquentEvents() as $event) {
-                    foreach ($reportGroup->getColumns() as $reportColumn) {
-                        $reportColumn->rebuildFrom($baseReportModel, static::class, $event['model']);
-                    }
-                }
+            $column->queueRebuild($baseReportModel, static::class);
 
-            } else {
-                foreach ($column->getEloquentEvents() as $event) {
-                    $column->rebuildFrom($baseReportModel, static::class, new $event['model']);
-                }
-
+            foreach ($column->getEloquentEvents() as $event) {
+                //
             }
         }
 
-        return self::query()->where(static::getOwner(), static::getOwnerValue($baseReportModel))->first();
+        // return self::for($baseReportModel);
+    }
+    
+    public static function rebuildBy(Model $sourceModel)
+    {
+        // Remove the entry to rebuild it
+        // static::query()->where(static::getOwner(), static::getOwnerValue($baseReportModel))->delete();
+        
+        foreach (static::columns() as $column) {
+            // $column->queueRebuild($sourceModel, static::class);
+            
+            foreach ($column->getEloquentEvents() as $event) {
+                if ($event['model'] === get_class($sourceModel)) {
+                    $baseModelReference = isset($event['trace'])
+                        ? dedot($event['trace'], $sourceModel)
+                        : $sourceModel;
+                    
+                    $column->queueRebuild($baseModelReference, static::class, $sourceModel);
+                }
+            }
+        }
+        
+        // return self::for($baseReportModel);
+    }
+    
+    public static function getBase(): string|null
+    {
+        return static::$baseModel ?? null;
     }
 
     public static function recalculateFor(Model $eventModel): void

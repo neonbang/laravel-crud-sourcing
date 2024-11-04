@@ -11,6 +11,11 @@ class LaravelCrudSourcingConfig
         self::$disabledReports[] = $report;
     }
 
+    public function enable(string $report): void
+    {
+        unset(self::$disabledReports[$report]);
+    }
+
     public function isDisabled(string $report): bool
     {
         return in_array($report, self::$disabledReports);

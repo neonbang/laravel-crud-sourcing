@@ -3,22 +3,26 @@
 namespace NeonBang\LaravelCrudSourcing\Tests\Subscribers;
 
 use Illuminate\Database\Eloquent\Model;
-use NeonBang\LaravelCrudSourcing\Tests\Models\Artist;
+use NeonBang\LaravelCrudSourcing\Tests\Models\RecordLabel as RecordLabelModel;
 
 class RecordLabel
 {
-    public function include(Artist|Model $model): bool
+    public function collect($builder, $eventModel = null)
     {
-        return true;
+        return $builder;
     }
 
-    public function scope(Model $subjectModel): mixed
+    public function find(Model $eventWhenRootEventButBaseWhenRebuildingModel)
     {
-        return \NeonBang\LaravelCrudSourcing\Tests\Models\RecordLabel::find($subjectModel->record_label_id);
+        return RecordLabelModel::find($eventWhenRootEventButBaseWhenRebuildingModel->record_label_id);
     }
 
-    public function __call(string $name, array $arguments)
+    public function scope(Model $baseReportModel, Model|string $eventModel = null): mixed
     {
-        dd($name, $arguments);
+        if ($baseReportModel instanceof RecordLabelModel) {
+            return $baseReportModel;
+        }
+
+        return RecordLabelModel::find($baseReportModel->record_label_id);
     }
 }
